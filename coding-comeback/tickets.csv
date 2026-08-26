@@ -1,0 +1,26 @@
+ticket_id,title,priority,status,created_date,assigned_team
+INC-1001,Monthly report email failed,P1,Open,2026-08-15,Reporting
+INC-1002,User cannot access dashboard,P2,In Progress,2026-08-17,Access
+INC-1003,Cloud storage file missing,P1,Open,2026-08-10,Platform
+INC-1004,Incorrect report data,P3,Resolved,2026-08-19,Reporting
+INC-1005,Admin role access request,P4,Closed,2026-08-20,Access
+INC-1006,API returns 500 error,P1,In Progress,2026-08-14,Backend
+INC-1007,Report generation is slow,P2,Open,2026-08-18,Reporting
+INC-1008,Pub Sub message not processed,P2,Open,2026-08-12,Platform
+INC-1009,Request for new user account,P4,Closed,2026-08-21,Access
+INC-1010,BigQuery query timeout,P2,In Progress,2026-08-16,Data
+INC-1011,SMTP authentication failed,P1,Open,2026-08-11,Reporting
+INC-1012,Need access to GCP bucket,P3,Resolved,2026-08-22,Access
+INC-1013,Cloud Scheduler job did not run,P2,Open,2026-08-13,Platform
+INC-1014,Duplicate records in report,P3,Open,2026-08-18,Data
+INC-1015,Service account permission denied,P1,In Progress,2026-08-09,Platform
+INC-1016,User requests report update,P4,Closed,2026-08-23,Reporting
+INC-1017,REST API response is invalid,P2,Open,2026-08-17,Backend
+INC-1018,Database connection refused,P1,Open,2026-08-08,Backend
+INC-1019,Incorrect user role assigned,P3,Resolved,2026-08-20,Access
+INC-1020,Daily report not uploaded,P2,In Progress,2026-08-15,Reporting
+INC-1021,GCP bucket object deleted,P1,Open,2026-08-12,Platform
+INC-1022,Need quarterly access review,P4,Closed,2026-08-24,Access
+INC-1023,BigQuery dataset permission issue,P3,Open,2026-08-16,Data
+INC-1024,Application log file unavailable,P2,In Progress,2026-08-14,Backend
+INC-1025,Automation job completed successfully,P4,Closed,2026-08-23,Reporting
