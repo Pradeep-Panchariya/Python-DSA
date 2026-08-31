@@ -114,3 +114,9 @@ Question 7 (15 points): Explain in your own words (no code): a) Why do we use (n
 b) std is more useful than variance when we is calculating the heights in cm
 c ) median is better than mean when there is some outliers 
 """
+
+
+
+"""
+Finally I got 74 marks out of 100
+"""
