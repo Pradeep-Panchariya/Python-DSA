@@ -1,5 +1,5 @@
 from pydantic import BaseModel, Field
-
+from typing import Literal
 
 class IncidentRequest(BaseModel):
 
@@ -20,7 +20,14 @@ class IncidentRequest(BaseModel):
 
 class IncidentAnalysisResponse(BaseModel):
     summary : str
-    category : str 
-    suggested_priority : str 
+    category : Literal[
+        "reporting",
+        "access",
+        "platform",
+        "backend",
+        "data",
+        "needs_review",
+    ]
+    suggested_priority : Literal["P1","P2","P3","P4"]
     investigation_steps : list[str]
     human_review_required : bool 
