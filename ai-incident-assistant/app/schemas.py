@@ -16,3 +16,11 @@ class IncidentRequest(BaseModel):
             "Cloud schedular was ran successfully, but the report email was not delieverd."
         ]
     )
+
+
+class IncidentAnalysisResponse(BaseModel):
+    summary : str
+    category : str 
+    suggested_priority : str 
+    investigation_steps : list[str]
+    human_review_required : bool 
