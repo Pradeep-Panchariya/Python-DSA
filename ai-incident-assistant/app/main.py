@@ -6,12 +6,12 @@ logging.basicConfig(
     level=logging.INFO,
     format="%(asctime)s - %(levelname)s - %(name)s - %(message)s",
 )
-
+from app.config import settings
 logger = logging.getLogger(__name__)
 
 app = FastAPI(
-    title = "AI Incident Assistant",
-    version = "0.1.0",
+    title = settings.app_name,
+    version = settings.app_version
 )
 
 logger.info("AI Incident Assistant application started")
