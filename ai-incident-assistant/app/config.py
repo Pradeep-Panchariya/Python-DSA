@@ -7,8 +7,13 @@ class Settings(BaseSettings):
     environment : str = 'development'
     log_level : str = "INFO"
 
-    anthropic_api_key : str | None 
-    anthropic_model : str = "claude-sonnet-4-7"
+    # anthropic_api_key : str | None = None
+    # anthropic_model : str = "claude-sonnet-4-7"
+    # anthropic_workspace_id : str | None = None
+
+    #gemini info 
+    gemini_api_key: str | None = None
+    gemini_model: str = "gemini-3.8-flash"
 
     model_config = SettingsConfigDict(
         env_file='.env',

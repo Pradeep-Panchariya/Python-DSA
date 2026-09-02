@@ -9,4 +9,4 @@ def test_default_settings():
 
 
 def test_llm_default_model_is_configured():
-    assert settings.anthropic_model == "claude-sonnet-4-7"
+    assert settings.gemini_model == "gemini-3.8-flash"
