@@ -31,3 +31,4 @@ class IncidentAnalysisResponse(BaseModel):
     suggested_priority : Literal["P1","P2","P3","P4"]
     investigation_steps : list[str]
     human_review_required : bool 
+    source : Literal["rule_based","gemini"]

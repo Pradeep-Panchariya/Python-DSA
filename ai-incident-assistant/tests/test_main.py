@@ -31,7 +31,7 @@ def test_analyze_incident_returns_analysis():
     assert response_data["human_review_required"] is True
     assert "Monthly report email failed" in response_data["summary"]
     assert "SMTP authentication failed" in response_data["summary"]
-
+    assert response_data["source"] == "rule_based"
 
 
 def test_analyze_incident_rejects_short_input():

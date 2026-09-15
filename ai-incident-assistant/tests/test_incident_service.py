@@ -18,3 +18,4 @@ def test_analyze_incident_returns_expected_structure():
     assert "GCP bucket access denied" in result["summary"]
     assert "permission denied error" in result["summary"]
     assert len(result["investigation_steps"]) == 3
+    assert result["source"] == "rule_based"

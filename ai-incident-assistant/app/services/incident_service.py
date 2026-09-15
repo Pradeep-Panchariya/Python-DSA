@@ -14,4 +14,5 @@ def analyze_incident(incident: IncidentRequest) -> dict:
             "Check recent configuration changes",
         ],
         "human_review_required": True,
+        "source": "rule_based",
     }
