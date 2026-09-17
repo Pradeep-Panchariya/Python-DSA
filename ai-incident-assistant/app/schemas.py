@@ -18,9 +18,9 @@ class IncidentRequest(BaseModel):
     )
 
 
-class IncidentAnalysisResponse(BaseModel):
-    summary : str
-    category : Literal[
+class GeminiIncidentAnalysis(BaseModel):
+    summary: str
+    category: Literal[
         "reporting",
         "access",
         "platform",
@@ -28,7 +28,9 @@ class IncidentAnalysisResponse(BaseModel):
         "data",
         "needs_review",
     ]
-    suggested_priority : Literal["P1","P2","P3","P4"]
-    investigation_steps : list[str]
-    human_review_required : bool 
-    source : Literal["rule_based","gemini"]
+    suggested_priority: Literal["P1", "P2", "P3", "P4"]
+    investigation_steps: list[str]
+    human_review_required: bool
+
+class IncidentAnalysisResponse(GeminiIncidentAnalysis):
+    source: Literal["rule_based", "gemini"]
