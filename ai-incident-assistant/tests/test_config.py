@@ -10,3 +10,6 @@ def test_default_settings():
 
 def test_llm_default_model_is_configured():
     assert settings.gemini_model == "gemini-3.8-flash"
+
+def test_gemini_timeout_is_configured():
+    assert settings.gemini_timeout_seconds == 60

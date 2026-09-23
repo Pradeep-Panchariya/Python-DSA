@@ -76,6 +76,13 @@ def test_generate_structured_incident_analysis_returns_valid_model(
         "Analyze this incident."
     )
 
+    mock_client_class.assert_called_once()
+
+    client_call_kwargs = mock_client_class.call_args.kwargs
+
+    assert client_call_kwargs["api_key"] == "test-gemini-api-key"
+    assert client_call_kwargs["http_options"].timeout == 60_000
+
     assert result.category == "reporting"
     assert result.suggested_priority == "P2"
     assert result.human_review_required is True

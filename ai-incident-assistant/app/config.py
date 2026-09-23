@@ -14,6 +14,7 @@ class Settings(BaseSettings):
     #gemini info 
     gemini_api_key: str | None = None
     gemini_model: str = "gemini-3.8-flash"
+    gemini_timeout_seconds: int = 60
 
     model_config = SettingsConfigDict(
         env_file='.env',
