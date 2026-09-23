@@ -2,6 +2,9 @@ from app.schemas import IncidentRequest, IncidentAnalysisResponse
 import json 
 from pydantic import ValidationError
 
+from app.services.llm_service import generate_structured_incident_analysis
+from app.services.prompt_service import build_incident_analysis_prompt
+
 class IncidentAnalysisError(Exception):
     """Raised when an incident analysis cannot be parsed or validated."""
 
@@ -21,6 +24,21 @@ def analyze_incident(incident: IncidentRequest) -> dict:
         "human_review_required": True,
         "source": "rule_based",
     }
+
+
+def analyze_incident_with_gemini(
+    incident: IncidentRequest,
+) -> IncidentAnalysisResponse:
+    prompt = build_incident_analysis_prompt(incident)
+
+    gemini_analysis = generate_structured_incident_analysis(
+        prompt
+    )
+
+    return IncidentAnalysisResponse(
+        **gemini_analysis.model_dump(),
+        source="gemini",
+    )
 
 def parse_gemini_incident_analysis(raw_response:str,) -> IncidentAnalysisResponse:
     try: 

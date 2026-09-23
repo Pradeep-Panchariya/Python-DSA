@@ -2,6 +2,10 @@ from fastapi.testclient import TestClient
 
 from app.main import app
 
+from unittest.mock import patch
+
+from app.schemas import GeminiIncidentAnalysis
+
 client = TestClient(app)
 
 def test_health_check():
@@ -12,7 +16,25 @@ def test_health_check():
         "status": "AI Incident Assistant is running"
     }
 
-def test_analyze_incident_returns_analysis():
+@patch(
+    "app.services.incident_service."
+    "generate_structured_incident_analysis"
+)
+def test_analyze_incident_returns_analysis(mock_generate_analysis,):
+
+    mock_generate_analysis.return_value = GeminiIncidentAnalysis(
+    summary=("Monthly report email failed because SMTP authentication "
+            "failed during report delivery."
+    ),
+    category="reporting",
+    suggested_priority="P2",
+    investigation_steps=[
+        "Check SMTP credentials.",
+        "Verify Secret Manager configuration.",
+        "Review application logs.",
+    ],
+    human_review_required=True,
+)
     payload = {
         "title": "Monthly report email failed",
         "description":(
@@ -26,12 +48,12 @@ def test_analyze_incident_returns_analysis():
 
     response_data = response.json()
 
-    assert response_data["category"] == "needs_review"
-    assert response_data["suggested_priority"] == "P3"
+    assert response_data["category"] == "reporting"
+    assert response_data["suggested_priority"] == "P2"
     assert response_data["human_review_required"] is True
     assert "Monthly report email failed" in response_data["summary"]
     assert "SMTP authentication failed" in response_data["summary"]
-    assert response_data["source"] == "rule_based"
+    assert response_data["source"] == "gemini"
 
 
 def test_analyze_incident_rejects_short_input():

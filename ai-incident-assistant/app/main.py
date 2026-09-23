@@ -1,6 +1,6 @@
 from fastapi import FastAPI
 from app.schemas import IncidentRequest, IncidentAnalysisResponse
-from app.services.incident_service import analyze_incident
+from app.services.incident_service import analyze_incident_with_gemini
 import logging 
 logging.basicConfig(
     level=logging.INFO,
@@ -29,12 +29,12 @@ def analyze_incident_endpoint(incident : IncidentRequest) -> IncidentAnalysisRes
     )
     
 
-    analysis = analyze_incident(incident)
+    analysis = analyze_incident_with_gemini(incident)
 
     logger.info(
         "Incident analysis completed: category=%r priority=%r",
-        analysis["category"],
-        analysis["suggested_priority"],
+        analysis.category,
+        analysis.suggested_priority,
     )
 
     return analysis
