@@ -6,6 +6,8 @@ from unittest.mock import patch
 
 from app.schemas import GeminiIncidentAnalysis
 
+from app.services.llm_service import LLMServiceError
+
 client = TestClient(app)
 
 def test_health_check():
@@ -73,3 +75,30 @@ def test_analyze_incident_rejects_short_input():
 
     assert "title" in error_fields
     assert "description" in error_fields
+
+
+@patch(
+    "app.services.incident_service."
+    "generate_structured_incident_analysis"
+)
+def test_analyze_incident_returns_502_when_gemini_fails(
+    mock_generate_analysis,
+):
+    mock_generate_analysis.side_effect = LLMServiceError(
+        "Gemini request timed out."
+    )
+
+    payload = {
+        "title": "Monthly report email failed",
+        "description": (
+            "Cloud Scheduler completed successfully, but the report "
+            "email was not delivered because SMTP authentication failed."
+        ),
+    }
+
+    response = client.post("/analyze-incident", json=payload)
+
+    assert response.status_code == 502
+    assert response.json() == {
+        "detail": "AI analysis service is temporarily unavailable."
+    }

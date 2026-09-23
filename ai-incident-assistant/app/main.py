@@ -1,7 +1,10 @@
-from fastapi import FastAPI
+from fastapi import FastAPI, Request
+from fastapi.responses import JSONResponse
+from app.services.llm_service import LLMServiceError
 from app.schemas import IncidentRequest, IncidentAnalysisResponse
 from app.services.incident_service import analyze_incident_with_gemini
 import logging 
+
 logging.basicConfig(
     level=logging.INFO,
     format="%(asctime)s - %(levelname)s - %(name)s - %(message)s",
@@ -13,6 +16,24 @@ app = FastAPI(
     title = settings.app_name,
     version = settings.app_version
 )
+
+@app.exception_handler(LLMServiceError)
+def handle_llm_service_error(
+    request : Request,
+    error : LLMServiceError,
+) -> JSONResponse :
+    logger.error(
+        "LLM service failure: path=%r error=%r",
+        request.url.path,
+        str(error),
+    )
+
+    return JSONResponse(
+        status_code=502,
+        content={
+            "detail":"AI analysis service is temporarily unavailable."
+        },
+    )
 
 logger.info("AI Incident Assistant application started")
 
