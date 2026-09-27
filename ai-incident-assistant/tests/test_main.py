@@ -102,3 +102,22 @@ def test_analyze_incident_returns_502_when_gemini_fails(
     assert response.json() == {
         "detail": "AI analysis service is temporarily unavailable."
     }
+
+def test_health_check_returns_request_id():
+    response = client.get("/health")
+
+    assert response.status_code == 200
+    assert "X-Request-ID" in response.headers
+    assert response.headers["X-Request-ID"]
+
+
+def test_health_check_preserves_client_request_id():
+    request_id = "test-request-123"
+
+    response = client.get(
+        "/health",
+        headers={"X-Request-ID": request_id},
+    )
+
+    assert response.status_code == 200
+    assert response.headers["X-Request-ID"] == request_id

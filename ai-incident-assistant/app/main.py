@@ -5,6 +5,9 @@ from app.schemas import IncidentRequest, IncidentAnalysisResponse
 from app.services.incident_service import analyze_incident_with_gemini
 import logging 
 
+import uuid 
+
+
 logging.basicConfig(
     level=logging.INFO,
     format="%(asctime)s - %(levelname)s - %(name)s - %(message)s",
@@ -17,13 +20,28 @@ app = FastAPI(
     version = settings.app_version
 )
 
+
+@app.middleware("http")
+async def add_request_id(request : Request, call_next,):
+
+    request_id = request.headers.get("X-Request-ID", str(uuid.uuid4()),)
+
+    request.state.request_id = request_id 
+    response = await call_next(request)
+
+    response.headers["X-Request-ID"] = request_id
+
+    return response 
+
+
 @app.exception_handler(LLMServiceError)
 def handle_llm_service_error(
     request : Request,
     error : LLMServiceError,
 ) -> JSONResponse :
     logger.error(
-        "LLM service failure: path=%r error=%r",
+        "LLM service failure: request_id=%r path=%r error=%r",
+        request.state.request_id,
         request.url.path,
         str(error),
     )
@@ -43,19 +61,21 @@ def health_check():
 
 
 @app.post('/analyze-incident', response_model=IncidentAnalysisResponse)
-def analyze_incident_endpoint(incident : IncidentRequest) -> IncidentAnalysisResponse:
+def analyze_incident_endpoint(incident : IncidentRequest, request : Request,) -> IncidentAnalysisResponse:
     logger.info(
-        "Received incident analysis request: title=%r",
-        incident.title,
-    )
+                "Received incident analysis request: request_id=%r title=%r",
+                request.state.request_id,
+                incident.title,
+            )
     
 
     analysis = analyze_incident_with_gemini(incident)
 
     logger.info(
-        "Incident analysis completed: category=%r priority=%r",
-        analysis.category,
-        analysis.suggested_priority,
-    )
+                "Incident analysis completed: request_id=%r category=%r priority=%r",
+                request.state.request_id,
+                analysis.category,
+                analysis.suggested_priority,
+            )
 
     return analysis
