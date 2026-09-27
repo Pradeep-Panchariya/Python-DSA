@@ -13,3 +13,6 @@ def test_llm_default_model_is_configured():
 
 def test_gemini_timeout_is_configured():
     assert settings.gemini_timeout_seconds == 60
+
+def test_database_url_is_configured():
+    assert settings.database_url == "sqlite:///./incident_assistant.db"

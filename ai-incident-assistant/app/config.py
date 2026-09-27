@@ -16,6 +16,9 @@ class Settings(BaseSettings):
     gemini_model: str = "gemini-3.8-flash"
     gemini_timeout_seconds: int = 60
 
+    #database
+    database_url: str = "sqlite:///./incident_assistant.db"
+
     model_config = SettingsConfigDict(
         env_file='.env',
         env_file_encoding='utf-8',

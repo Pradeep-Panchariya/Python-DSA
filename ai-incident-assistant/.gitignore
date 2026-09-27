@@ -23,3 +23,5 @@ __pycache__/
 # Coverage output
 .coverage
 htmlcov/
+
+incident_assistant.db
