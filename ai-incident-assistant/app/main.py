@@ -4,6 +4,7 @@ from app.services.llm_service import LLMServiceError
 from app.schemas import IncidentRequest, IncidentAnalysisResponse
 from app.services.incident_service import analyze_incident_with_gemini
 import logging 
+from app.init_db import initialize_database
 
 import uuid 
 
@@ -21,6 +22,12 @@ app = FastAPI(
 )
 
 
+@app.on_event("startup")
+def create_database_table() -> None:
+    initialize_database()
+    logger.info("Database table initialized")
+
+    
 @app.middleware("http")
 async def add_request_id(request : Request, call_next,):
 
