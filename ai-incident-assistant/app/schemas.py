@@ -33,4 +33,6 @@ class GeminiIncidentAnalysis(BaseModel):
     human_review_required: bool
 
 class IncidentAnalysisResponse(GeminiIncidentAnalysis):
+    incident_id: int | None = None
     source: Literal["rule_based", "gemini"]
+    

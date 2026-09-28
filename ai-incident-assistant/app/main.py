@@ -1,11 +1,13 @@
-from fastapi import FastAPI, Request
+from fastapi import FastAPI, Request, Depends
 from fastapi.responses import JSONResponse
 from app.services.llm_service import LLMServiceError
 from app.schemas import IncidentRequest, IncidentAnalysisResponse
 from app.services.incident_service import analyze_incident_with_gemini
 import logging 
 from app.init_db import initialize_database
-
+from sqlalchemy.orm import Session
+from app.dependencies import get_db
+from app.repositories.incident_repository import create_incident_record
 import uuid 
 
 
@@ -27,7 +29,7 @@ def create_database_table() -> None:
     initialize_database()
     logger.info("Database table initialized")
 
-    
+
 @app.middleware("http")
 async def add_request_id(request : Request, call_next,):
 
@@ -68,7 +70,7 @@ def health_check():
 
 
 @app.post('/analyze-incident', response_model=IncidentAnalysisResponse)
-def analyze_incident_endpoint(incident : IncidentRequest, request : Request,) -> IncidentAnalysisResponse:
+def analyze_incident_endpoint(incident : IncidentRequest, request : Request, db: Session = Depends(get_db),) -> IncidentAnalysisResponse:
     logger.info(
                 "Received incident analysis request: request_id=%r title=%r",
                 request.state.request_id,
@@ -78,6 +80,13 @@ def analyze_incident_endpoint(incident : IncidentRequest, request : Request,) ->
 
     analysis = analyze_incident_with_gemini(incident)
 
+    record = create_incident_record(
+                db=db,
+                incident=incident,
+                analysis=analysis,
+            )
+
+
     logger.info(
                 "Incident analysis completed: request_id=%r category=%r priority=%r",
                 request.state.request_id,
@@ -85,4 +94,13 @@ def analyze_incident_endpoint(incident : IncidentRequest, request : Request,) ->
                 analysis.suggested_priority,
             )
 
-    return analysis
+    logger.info(
+            "Incident record saved: request_id=%r incident_id=%r",
+            request.state.request_id,
+            record.id,  
+        )
+
+    return analysis.model_copy(
+                    update={"incident_id": record.id}
+                )
+

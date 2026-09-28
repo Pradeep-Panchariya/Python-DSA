@@ -7,6 +7,8 @@ from unittest.mock import patch
 from app.schemas import GeminiIncidentAnalysis
 
 from app.services.llm_service import LLMServiceError
+import app.main as main_module
+from unittest.mock import MagicMock, patch
 
 client = TestClient(app)
 
@@ -22,7 +24,7 @@ def test_health_check():
     "app.services.incident_service."
     "generate_structured_incident_analysis"
 )
-def test_analyze_incident_returns_analysis(mock_generate_analysis,):
+def test_analyze_incident_returns_gemini_analysis(mock_generate_analysis,monkeypatch,):
 
     mock_generate_analysis.return_value = GeminiIncidentAnalysis(
     summary=("Monthly report email failed because SMTP authentication "
@@ -45,6 +47,18 @@ def test_analyze_incident_returns_analysis(mock_generate_analysis,):
         ),
     }
 
+    fake_record = MagicMock()
+    fake_record.id = 123
+
+    mock_create_record = MagicMock(
+    return_value=fake_record,
+    )
+
+    monkeypatch.setattr(
+        main_module,
+        "create_incident_record",
+        mock_create_record,
+    )
     response = client.post("/analyze-incident",json = payload)
     assert response.status_code == 200
 
@@ -56,6 +70,8 @@ def test_analyze_incident_returns_analysis(mock_generate_analysis,):
     assert "Monthly report email failed" in response_data["summary"]
     assert "SMTP authentication failed" in response_data["summary"]
     assert response_data["source"] == "gemini"
+    assert response_data["incident_id"] == 123
+    mock_create_record.assert_called_once()
 
 
 def test_analyze_incident_rejects_short_input():

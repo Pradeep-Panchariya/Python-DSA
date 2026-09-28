@@ -56,6 +56,7 @@ def test_analyze_incident_with_gemini_returns_gemini_source(
     result = analyze_incident_with_gemini(incident)
 
     assert result.source == "gemini"
+    assert result.incident_id is None
     assert result.category == "access"
     assert result.suggested_priority == "P2"
     assert result.human_review_required is True
