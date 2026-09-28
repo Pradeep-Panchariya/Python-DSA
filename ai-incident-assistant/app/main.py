@@ -1,4 +1,4 @@
-from fastapi import FastAPI, Request, Depends
+from fastapi import FastAPI, Request, Depends, HTTPException
 from fastapi.responses import JSONResponse
 from app.services.llm_service import LLMServiceError
 from app.schemas import IncidentRequest, IncidentAnalysisResponse
@@ -7,7 +7,7 @@ import logging
 from app.init_db import initialize_database
 from sqlalchemy.orm import Session
 from app.dependencies import get_db
-from app.repositories.incident_repository import create_incident_record
+from app.repositories.incident_repository import create_incident_record, get_incident_record
 import uuid 
 
 
@@ -104,3 +104,35 @@ def analyze_incident_endpoint(incident : IncidentRequest, request : Request, db:
                     update={"incident_id": record.id}
                 )
 
+
+@app.get("/incidents/{incident_id}",
+         response_model=IncidentAnalysisResponse,
+        )
+def get_incident_endpoint(
+    incident_id : int, 
+    request : Request,
+    db: Session = Depends(get_db),
+) -> IncidentAnalysisResponse:
+    record = get_incident_record(db=db, incident_id=incident_id,)
+
+    if record is None:
+        raise HTTPException(
+            status_code=404,
+            detail=f"Incident with id {incident_id} was not found.",
+        )
+
+    logger.info(
+        "Incident record retrieved: request_id=%r incident_id=%r",
+        request.state.request_id,
+        record.id,
+    )
+
+    return IncidentAnalysisResponse(
+        incident_id=record.id,
+        summary=record.summary,
+        category=record.category,
+        suggested_priority=record.suggested_priority,
+        investigation_steps=record.investigation_steps,
+        human_review_required=record.human_review_required,
+        source=record.source,
+    )

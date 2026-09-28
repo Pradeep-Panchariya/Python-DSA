@@ -10,6 +10,7 @@ from app.services.llm_service import LLMServiceError
 import app.main as main_module
 from unittest.mock import MagicMock, patch
 
+
 client = TestClient(app)
 
 def test_health_check():
@@ -137,3 +138,57 @@ def test_health_check_preserves_client_request_id():
 
     assert response.status_code == 200
     assert response.headers["X-Request-ID"] == request_id
+
+
+def test_get_incident_returns_stored_record(monkeypatch):
+    fake_record = MagicMock()
+    fake_record.id = 123
+    fake_record.summary = (
+        "Monthly report delivery failed because SMTP authentication failed."
+    )
+    fake_record.category = "reporting"
+    fake_record.suggested_priority = "P2"
+    fake_record.investigation_steps = [
+        "Check SMTP credentials.",
+        "Verify Secret Manager configuration.",
+        "Review application logs.",
+    ]
+    fake_record.human_review_required = True
+    fake_record.source = "gemini"
+
+    mock_get_record = MagicMock(return_value=fake_record)
+
+    monkeypatch.setattr(
+        main_module,
+        "get_incident_record",
+        mock_get_record,
+    )
+
+    response = client.get("/incidents/123")
+
+    assert response.status_code == 200
+
+    response_data = response.json()
+
+    assert response_data["incident_id"] == 123
+    assert response_data["category"] == "reporting"
+    assert response_data["suggested_priority"] == "P2"
+    assert response_data["source"] == "gemini"
+
+    mock_get_record.assert_called_once()
+
+def test_get_incident_returns_404_when_not_found(monkeypatch):
+    mock_get_record = MagicMock(return_value=None)
+
+    monkeypatch.setattr(
+        main_module,
+        "get_incident_record",
+        mock_get_record,
+    )
+
+    response = client.get("/incidents/99999")
+
+    assert response.status_code == 404
+    assert response.json() == {
+        "detail": "Incident with id 99999 was not found."
+    }

@@ -1,6 +1,7 @@
 from sqlalchemy.orm import session
 from app.models import IncidentRecord
 from app.schemas import IncidentAnalysisResponse, IncidentRequest
+from sqlalchemy.orm import Session
 
 def create_incident_record(
         db: session, 
@@ -24,3 +25,9 @@ def create_incident_record(
     db.refresh(incident_record)
 
     return incident_record
+
+def get_incident_record(
+        db: Session, 
+        incident_id : int, 
+) -> IncidentRecord | None:
+    return db.get(IncidentRecord, incident_id)
