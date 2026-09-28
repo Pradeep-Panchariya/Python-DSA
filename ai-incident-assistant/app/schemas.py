@@ -35,4 +35,39 @@ class GeminiIncidentAnalysis(BaseModel):
 class IncidentAnalysisResponse(GeminiIncidentAnalysis):
     incident_id: int | None = None
     source: Literal["rule_based", "gemini"]
-    
+
+class IncidentReviewRequest(BaseModel):
+    reviewed_by: str = Field(
+        min_length=3,
+        max_length=150,
+        examples=["pradeep@example.com"],
+    )
+    review_notes: str = Field(
+        min_length=5,
+        max_length=2000,
+        examples=["Confirmed SMTP credentials were expired."],
+    )
+    category: Literal[
+        "reporting",
+        "access",
+        "platform",
+        "backend",
+        "data",
+        "needs_review",
+    ]
+    suggested_priority: Literal["P1", "P2", "P3", "P4"]
+
+class IncidentReviewResponse(BaseModel):
+    incident_id: int
+    reviewed: bool
+    reviewed_by: str
+    review_notes: str
+    category: Literal[
+        "reporting",
+        "access",
+        "platform",
+        "backend",
+        "data",
+        "needs_review",
+    ]
+    suggested_priority: Literal["P1", "P2", "P3", "P4"]

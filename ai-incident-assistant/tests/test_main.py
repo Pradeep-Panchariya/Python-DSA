@@ -4,7 +4,7 @@ from app.main import app
 
 from unittest.mock import patch
 
-from app.schemas import GeminiIncidentAnalysis
+from app.schemas import GeminiIncidentAnalysis, IncidentReviewRequest
 
 from app.services.llm_service import LLMServiceError
 import app.main as main_module
@@ -192,3 +192,79 @@ def test_get_incident_returns_404_when_not_found(monkeypatch):
     assert response.json() == {
         "detail": "Incident with id 99999 was not found."
     }
+
+
+def test_review_incident_returns_reviewed_response(monkeypatch):
+    fake_record = MagicMock()
+    fake_record.id = 123
+    fake_record.reviewed = True
+    fake_record.reviewed_by = "pradeep@example.com"
+    fake_record.review_notes = (
+        "Confirmed that SMTP credentials were expired."
+    )
+    fake_record.category = "reporting"
+    fake_record.suggested_priority = "P2"
+
+    mock_review_record = MagicMock(return_value=fake_record)
+
+    monkeypatch.setattr(
+        main_module,
+        "review_incident_record",
+        mock_review_record,
+    )
+
+    payload = {
+        "reviewed_by": "pradeep@example.com",
+        "review_notes": "Confirmed that SMTP credentials were expired.",
+        "category": "reporting",
+        "suggested_priority": "P2",
+    }
+
+    response = client.patch(
+        "/incidents/123/review",
+        json=payload,
+    )
+
+    assert response.status_code == 200
+
+    response_data = response.json()
+
+    assert response_data["incident_id"] == 123
+    assert response_data["reviewed"] is True
+    assert response_data["reviewed_by"] == "pradeep@example.com"
+    assert response_data["review_notes"] == (
+        "Confirmed that SMTP credentials were expired."
+    )
+    assert response_data["category"] == "reporting"
+    assert response_data["suggested_priority"] == "P2"
+
+
+    mock_review_record.assert_called_once()
+
+def test_review_incident_returns_404_when_not_found(monkeypatch):
+    mock_review_record = MagicMock(return_value=None)
+
+    monkeypatch.setattr(
+        main_module,
+        "review_incident_record",
+        mock_review_record,
+    )
+
+    payload = {
+        "reviewed_by": "pradeep@example.com",
+        "review_notes": "Confirmed that SMTP credentials were expired.",
+        "category": "reporting",
+        "suggested_priority": "P2",
+    }
+
+    response = client.patch(
+        "/incidents/99999/review",
+        json=payload,
+    )
+
+    assert response.status_code == 404
+    assert response.json() == {
+        "detail": "Incident with id 99999 was not found."
+    }
+
+    mock_review_record.assert_called_once()

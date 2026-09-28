@@ -20,6 +20,10 @@ def test_incident_record_has_expected_columns():
         "human_review_required",
         "source",
         "created_at",
+        "reviewed",
+        "reviewed_by",
+        "review_notes",
+        "reviewed_at",
     }
 
     assert column_names == expected_columns

@@ -59,3 +59,24 @@ class IncidentRecord(Base):
         default=lambda: datetime.now(timezone.utc),
         nullable=False,
     )
+
+    reviewed: Mapped[bool] = mapped_column(
+        Boolean,
+        default=False,
+        nullable=False,
+    )
+
+    reviewed_by: Mapped[str | None] = mapped_column(
+        String(150),
+        nullable=True,
+    )
+
+    review_notes: Mapped[str | None] = mapped_column(
+        Text,
+        nullable=True,
+    )
+
+    reviewed_at: Mapped[datetime | None] = mapped_column(
+        DateTime(timezone=True),
+        nullable=True,
+    )
