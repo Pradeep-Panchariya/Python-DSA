@@ -3,6 +3,7 @@ from app.models import IncidentRecord
 from app.schemas import IncidentAnalysisResponse, IncidentRequest, IncidentReviewRequest
 from sqlalchemy.orm import Session
 from datetime import datetime, timezone 
+from sqlalchemy import select
 
 def create_incident_record(
         db: session, 
@@ -54,3 +55,21 @@ def review_incident_record(
     db.refresh(incident_record)
 
     return incident_record
+
+def list_incident_records(
+    db: Session,
+    limit: int,
+    reviewed: bool | None = None,
+) -> list[IncidentRecord]:
+    statement = select(IncidentRecord).order_by(
+        IncidentRecord.created_at.desc()
+    )
+
+    if reviewed is not None:
+        statement = statement.where(
+            IncidentRecord.reviewed == reviewed
+        )
+
+    statement = statement.limit(limit)
+
+    return list(db.scalars(statement).all())

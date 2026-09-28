@@ -1,6 +1,6 @@
 from app.database import SessionLocal
 from app.init_db import initialize_database
-from app.repositories.incident_repository import create_incident_record, get_incident_record, review_incident_record
+from app.repositories.incident_repository import create_incident_record, get_incident_record, review_incident_record, list_incident_records
 from app.schemas import IncidentAnalysisResponse, IncidentRequest, IncidentReviewRequest
 
 
@@ -163,6 +163,56 @@ def test_review_incident_record_updates_saved_record():
     finally:
         if record is not None:
             db.delete(record)
+            db.commit()
+
+        db.close()
+
+def test_list_incident_records_returns_saved_records():
+    initialize_database()
+
+    incident = IncidentRequest(
+        title="GCP bucket access denied",
+        description=(
+            "The scheduled process cannot read the input file because "
+            "the service account receives a permission denied error."
+        ),
+    )
+
+    analysis = IncidentAnalysisResponse(
+        summary="Service account cannot access the input file.",
+        category="access",
+        suggested_priority="P2",
+        investigation_steps=[
+            "Review IAM roles.",
+            "Verify bucket permissions.",
+            "Check recent policy changes.",
+        ],
+        human_review_required=True,
+        source="gemini",
+    )
+
+    db = SessionLocal()
+    created_record = None
+
+    try:
+        created_record = create_incident_record(
+            db=db,
+            incident=incident,
+            analysis=analysis,
+        )
+
+        records = list_incident_records(
+            db=db,
+            limit=10,
+        )
+
+        record_ids = [record.id for record in records]
+
+        assert created_record.id in record_ids
+
+    finally:
+        if created_record is not None:
+            db.delete(created_record)
             db.commit()
 
         db.close()

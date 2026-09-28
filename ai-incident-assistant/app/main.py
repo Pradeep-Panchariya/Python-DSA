@@ -7,7 +7,7 @@ import logging
 from app.init_db import initialize_database
 from sqlalchemy.orm import Session
 from app.dependencies import get_db
-from app.repositories.incident_repository import create_incident_record, get_incident_record, review_incident_record
+from app.repositories.incident_repository import create_incident_record, get_incident_record, review_incident_record, list_incident_records
 import uuid 
 
 
@@ -103,6 +103,43 @@ def analyze_incident_endpoint(incident : IncidentRequest, request : Request, db:
     return analysis.model_copy(
                     update={"incident_id": record.id}
                 )
+
+
+@app.get(
+    "/incidents",
+    response_model=list[IncidentAnalysisResponse],
+)
+def list_incidents_endpoint(
+    request: Request,
+    db: Session = Depends(get_db),
+    limit: int = 20,
+    reviewed: bool | None = None,
+) -> list[IncidentAnalysisResponse]:
+    records = list_incident_records(
+        db=db,
+        limit=limit,
+        reviewed=reviewed,
+    )
+
+    logger.info(
+        "Incident records listed: request_id=%r count=%r reviewed=%r",
+        request.state.request_id,
+        len(records),
+        reviewed,
+    )
+
+    return [
+        IncidentAnalysisResponse(
+            incident_id=record.id,
+            summary=record.summary,
+            category=record.category,
+            suggested_priority=record.suggested_priority,
+            investigation_steps=record.investigation_steps,
+            human_review_required=record.human_review_required,
+            source=record.source,
+        )
+        for record in records
+    ]
 
 
 @app.get("/incidents/{incident_id}",

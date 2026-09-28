@@ -268,3 +268,74 @@ def test_review_incident_returns_404_when_not_found(monkeypatch):
     }
 
     mock_review_record.assert_called_once()
+
+def test_list_incidents_returns_records(monkeypatch):
+    first_record = MagicMock()
+    first_record.id = 101
+    first_record.summary = "SMTP authentication failed."
+    first_record.category = "reporting"
+    first_record.suggested_priority = "P2"
+    first_record.investigation_steps = [
+        "Check SMTP credentials.",
+        "Review application logs.",
+        "Test SMTP connection.",
+    ]
+    first_record.human_review_required = True
+    first_record.source = "gemini"
+
+    second_record = MagicMock()
+    second_record.id = 102
+    second_record.summary = "Bucket permission denied."
+    second_record.category = "access"
+    second_record.suggested_priority = "P3"
+    second_record.investigation_steps = [
+        "Review IAM roles.",
+        "Verify bucket permissions.",
+        "Check policy changes.",
+    ]
+    second_record.human_review_required = True
+    second_record.source = "gemini"
+
+    mock_list_records = MagicMock(
+        return_value=[first_record, second_record],
+    )
+
+    monkeypatch.setattr(
+        main_module,
+        "list_incident_records",
+        mock_list_records,
+    )
+
+    response = client.get("/incidents?limit=10")
+
+    assert response.status_code == 200
+
+    response_data = response.json()
+
+    assert len(response_data) == 2
+    assert response_data[0]["incident_id"] == 101
+    assert response_data[0]["category"] == "reporting"
+    assert response_data[1]["incident_id"] == 102
+    assert response_data[1]["category"] == "access"
+
+    mock_list_records.assert_called_once()
+
+
+def test_list_incidents_passes_reviewed_filter(monkeypatch):
+    mock_list_records = MagicMock(return_value=[])
+
+    monkeypatch.setattr(
+        main_module,
+        "list_incident_records",
+        mock_list_records,
+    )
+
+    response = client.get("/incidents?limit=5&reviewed=false")
+
+    assert response.status_code == 200
+    assert response.json() == []
+
+    call_kwargs = mock_list_records.call_args.kwargs
+
+    assert call_kwargs["limit"] == 5
+    assert call_kwargs["reviewed"] is False
