@@ -1,0 +1,30 @@
+# Git
+.git/
+.gitignore
+
+# Virtual environments
+.venv/
+.myvenv/
+venv/
+
+# Python and test cache
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.coverage
+htmlcov/
+
+# Local secrets and environment
+.env
+
+# Local SQLite database
+incident_assistant.db
+
+# IDE and OS files
+.vscode/
+.idea/
+.DS_Store
+
+# Documentation/test-only files
+tests/
+manual_llm_test.py
