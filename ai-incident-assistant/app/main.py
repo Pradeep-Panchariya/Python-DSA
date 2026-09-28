@@ -9,7 +9,7 @@ from sqlalchemy.orm import Session
 from app.dependencies import get_db
 from app.repositories.incident_repository import create_incident_record, get_incident_record, review_incident_record, list_incident_records
 import uuid 
-
+from app.config import settings
 
 logging.basicConfig(
     level=logging.INFO,
@@ -104,6 +104,18 @@ def analyze_incident_endpoint(incident : IncidentRequest, request : Request, db:
                     update={"incident_id": record.id}
                 )
 
+
+@app.get("/config")
+def get_public_config():
+    return {
+        "app_name": settings.app_name,
+        "app_version": settings.app_version,
+        "environment": settings.environment,
+        "gemini_model": settings.gemini_model,
+        "gemini_timeout_seconds": settings.gemini_timeout_seconds,
+        "database_url_configured": bool(settings.database_url),
+        "gemini_api_key_configured": bool(settings.gemini_api_key),
+    }
 
 @app.get(
     "/incidents",

@@ -9,7 +9,7 @@ from app.schemas import GeminiIncidentAnalysis, IncidentReviewRequest
 from app.services.llm_service import LLMServiceError
 import app.main as main_module
 from unittest.mock import MagicMock, patch
-
+from app.config import settings 
 
 client = TestClient(app)
 
@@ -339,3 +339,15 @@ def test_list_incidents_passes_reviewed_filter(monkeypatch):
 
     assert call_kwargs["limit"] == 5
     assert call_kwargs["reviewed"] is False
+
+def test_public_config_does_not_expose_api_key():
+    response = client.get("/config")
+
+    assert response.status_code == 200
+
+    response_data = response.json()
+
+    assert response_data["app_name"] == "AI Incident Assistant"
+    assert response_data["gemini_model"] == settings.gemini_model
+    assert "gemini_api_key" not in response_data
+    assert "gemini_api_key_configured" in response_data
