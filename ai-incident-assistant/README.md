@@ -378,6 +378,20 @@ pytest test suite runs
 Pass/fail status is displayed in GitHub Actions
 ```
 
+## Demo Evidence
+
+### Swagger API Documentation
+![](docs/images/swagger-endpoints.png)
+
+### Gemini Structured Incident Analysis
+![](docs/images/gemini-analysis-response.png)
+
+### Google Cloud Run Deployment
+![](docs/images/cloud-run-deployment.png)
+
+### GitHub Actions CI
+![](docs/images/github-actions-ci.png)
+
 ## Limitations
 
 - Cloud Run SQLite storage is temporary and unsuitable for production persistence
@@ -406,4 +420,3 @@ Pass/fail status is displayed in GitHub Actions
 Pradeep Panchariya  
 Python, GCP, Backend and Applied AI Engineering Project
 ```
-`
