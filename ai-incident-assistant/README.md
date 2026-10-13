@@ -27,7 +27,7 @@ AI Incident Assistant accepts an incident title and description, generates a str
 - GitHub Actions CI test workflow
 
 ## Architecture
-
+```
 mermaid
 flowchart TD
 Client[Swagger / Frontend / API Client] --> API[FastAPI API]
@@ -40,10 +40,10 @@ Gemini --> LLMService
 IncidentService --> Repository[Incident Repository]
 Repository --> Database[(SQLite Database)]
 API --> Client
-
+`
 
 ## Request Flow
-
+```
 text
 POST /analyze-incident
 ↓
@@ -58,7 +58,7 @@ Validate Gemini JSON with Pydantic
 Store incident and analysis
 ↓
 Return incident ID and structured analysis
-
+`
 
 ## Tech Stack
 
