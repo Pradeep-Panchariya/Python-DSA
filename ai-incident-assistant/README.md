@@ -28,39 +28,75 @@ AI Incident Assistant accepts an incident title and description, generates a str
 
 ## Architecture
 
-```
-mermaid
+```mermaid
 flowchart TD
-Client[Swagger / Frontend / API Client] --> API[FastAPI API]
-API --> Validation[Pydantic Validation]
-Validation --> IncidentService[Incident Service]
-IncidentService --> PromptService[Prompt Service]
-PromptService --> LLMService[Gemini LLM Service]
-LLMService --> Gemini[Google Gemini API]
-Gemini --> LLMService
-IncidentService --> Repository[Incident Repository]
-Repository --> Database[(SQLite Database)]
-API --> Client
+    %% Styling and layout configurations
+    classDef client fill:#e1f5fe,stroke:#03a9f4,stroke-width:2px;
+    classDef api fill:#e8f5e9,stroke:#4caf50,stroke-width:2px;
+    classDef logic fill:#fff3e0,stroke:#ff9800,stroke-width:2px;
+    classDef llm fill:#f3e5f5,stroke:#9c27b0,stroke-width:2px;
+    classDef db fill:#eceff1,stroke:#607d8b,stroke-width:2px;
+
+    %% Components
+    subgraph UserInterface [Interface Layer]
+        Client[Swagger / Frontend / API Client]:::client
+    end
+
+    subgraph Presentation [API & Validation Layer]
+        API[FastAPI API]:::api
+        Validation[Pydantic Validation]:::api
+    end
+
+    subgraph CoreLogic [Business Logic Layer]
+        IncidentService[Incident Service]:::logic
+        PromptService[Prompt Service]:::logic
+    end
+
+    subgraph Integrations [External & Data Layer]
+        LLMService[Gemini LLM Service]:::llm
+        Gemini[Google Gemini API]:::llm
+        Repository[Incident Repository]:::db
+        Database[(SQLite Database)]:::db
+    end
+
+    %% Workflow / Execution Paths
+    Client -->|1. POST /analyze-incident| API
+    API -->|2. Validate IncidentRequest| Validation
+    Validation --> IncidentService
+    
+    %% AI Pipeline Execution
+    IncidentService -->|3. Request Analysis| PromptService
+    PromptService -->|Build structured prompt| LLMService
+    LLMService -->|Call Interactions API| Gemini
+    Gemini -->|Return JSON| LLMService
+    LLMService -->|Validate Gemini JSON with Pydantic| IncidentService
+
+    %% Database Storage
+    IncidentService -->|4. Store incident & analysis| Repository
+    Repository --> Database
+
+    %% Return Path
+    IncidentService -->|5. Return Analysis & ID| API
+    API -->|6. JSON Response| Client
 ```
+
 
 ## Request Flow
 
+```mermaid
+flowchart TD
+    A([POST /analyze-incident]) --> B[Validate IncidentRequest]
+    B --> C[Build Structured Gemini Prompt]
+    C --> D[Call Gemini Interactions API]
+    D --> E[Validate Gemini JSON with Pydantic]
+    E --> F[Store Incident and Analysis]
+    F --> G([Return Incident ID and Structured Analysis])
+
+    %% Styling to make it look clean on GitHub
+    style A fill:#e1f5fe,stroke:#03a9f4,stroke-width:2px
+    style G fill:#e8f5e9,stroke:#4caf50,stroke-width:2px
 ```
-text
-POST /analyze-incident
-↓
-Validate IncidentRequest
-↓
-Build structured Gemini prompt
-↓
-Call Gemini Interactions API
-↓
-Validate Gemini JSON with Pydantic
-↓
-Store incident and analysis
-↓
-Return incident ID and structured analysis
-```
+
 
 ## Tech Stack
 
